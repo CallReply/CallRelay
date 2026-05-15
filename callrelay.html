@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CallRelay — Never Miss a Customer Again</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --accent: #00e5a0;
+    --accent2: #00b8ff;
+    --accent-dim: rgba(0,229,160,0.12);
+    --accent2-dim: rgba(0,184,255,0.1);
+    --text: #f0f0f8;
+    --muted: #6b6b88;
+    --border: rgba(255,255,255,0.07);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.4rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10,10,15,0.7);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+  }
+
+  .logo span { color: var(--accent); }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 2.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  nav ul a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  nav ul a:hover { color: var(--text); }
+
+  .nav-cta {
+    background: var(--accent);
+    color: #000 !important;
+    padding: 0.55rem 1.3rem;
+    border-radius: 6px;
+    font-weight: 700 !important;
+    transition: opacity 0.2s !important;
+  }
+
+  .nav-cta:hover { opacity: 0.85; color: #000 !important; }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8rem 2rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    background: radial-gradient(ellipse, rgba(0,229,160,0.12) 0%, transparent 70%);
+    top: 10%; left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .hero-glow2 {
+    position: absolute;
+    width: 500px; height: 400px;
+    background: radial-gradient(ellipse, rgba(0,184,255,0.08) 0%, transparent 70%);
+    bottom: 5%; right: 5%;
+    pointer-events: none;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,229,160,0.25);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 100px;
+    margin-bottom: 2.2rem;
+    letter-spacing: 0.06em;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  h1 {
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+
+  h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    margin-top: 1.6rem;
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.7;
+    font-weight: 400;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .hero-actions {
+    margin-top: 2.8rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 30px rgba(0,229,160,0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 45px rgba(0,229,160,0.45);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── PHONE MOCKUP ─── */
+  .mockup-wrap {
+    margin-top: 4.5rem;
+    position: relative;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .phone {
+    width: 280px;
+    background: var(--surface);
+    border-radius: 36px;
+    border: 1.5px solid var(--border);
+    padding: 1.4rem 1rem 1.6rem;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    position: relative;
+  }
+
+  .phone-notch {
+    width: 90px;
+    height: 10px;
+    background: #1e1e28;
+    border-radius: 6px;
+    margin: 0 auto 1.2rem;
+    border: 1px solid var(--border);
+  }
+
+  .missed-call {
+    background: var(--surface2);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border: 1px solid rgba(255,80,80,0.15);
+  }
+
+  .call-icon {
+    width: 38px; height: 38px;
+    background: rgba(255,80,80,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .call-details { text-align: left; }
+  .call-name { font-size: 0.82rem; font-weight: 700; }
+  .call-label {
+    font-size: 0.68rem;
+    color: #ff5050;
+    font-family: 'DM Mono', monospace;
+    margin-top: 0.1rem;
+  }
+  .call-time {
+    font-size: 0.65rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .sms-bubble {
+    background: linear-gradient(135deg, rgba(0,229,160,0.15), rgba(0,184,255,0.1));
+    border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 14px 14px 14px 4px;
+    padding: 0.85rem 1rem;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--text);
+    text-align: left;
+    position: relative;
+    margin-left: 0.2rem;
+  }
+
+  .sms-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--accent);
+    margin-bottom: 0.35rem;
+    letter-spacing: 0.05em;
+  }
+
+  .sms-sent-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .relay-badge-phone {
+    position: absolute;
+    top: -12px; right: -12px;
+    background: var(--accent);
+    color: #000;
+    font-size: 0.55rem;
+    font-weight: 800;
+    padding: 0.25rem 0.6rem;
+    border-radius: 100px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ─── LOGOS BAR ─── */
+  .logos-bar {
+    padding: 3rem 2rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logos-bar p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.8rem;
+  }
+
+  .logos-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3.5rem;
+    flex-wrap: wrap;
+  }
+
+  .logo-item {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+
+  .logo-item:hover { opacity: 0.8; }
+
+  /* ─── HOW IT WORKS ─── */
+  section { padding: 7rem 2rem; }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  .section-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 3.5rem;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .step {
+    background: var(--surface);
+    padding: 2.2rem;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .step:hover { background: var(--surface2); }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.2rem;
+  }
+
+  .step-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .step h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+    letter-spacing: -0.02em;
+  }
+
+  .step p {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.7;
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+  }
+
+  .step-connector {
+    position: absolute;
+    top: 50%; right: -12px;
+    width: 24px; height: 24px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem;
+    color: #000;
+    font-weight: 800;
+    z-index: 2;
+  }
+
+  /* ─── FEATURES ─── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .feature {
+    background: var(--bg);
+    padding: 2.5rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature:hover { background: var(--surface); }
+
+  .feature::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .feature:hover::before { opacity: 1; }
+
+  .feature-icon {
+    width: 46px; height: 46px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .feature h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.01em;
+  }
+
+  .feature p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+  }
+
+  /* ─── STATS ─── */
+  .stats-section {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 5rem 2rem;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 3rem;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── PRICING ─── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+  }
+
+  .plan {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.2rem;
+    transition: border-color 0.3s, transform 0.3s;
+    position: relative;
+  }
+
+  .plan:hover {
+    border-color: rgba(0,229,160,0.3);
+    transform: translateY(-4px);
+  }
+
+  .plan.featured {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  .plan-badge {
+    position: absolute;
+    top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--accent);
+    color: #000;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.25rem 0.9rem;
+    border-radius: 100px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .plan-name {
+    font-size: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  .plan-price {
+    font-size: 2.8rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .plan-price sup { font-size: 1.2rem; vertical-align: super; }
+  .plan-price span { font-size: 0.85rem; color: var(--muted); font-weight: 400; }
+
+  .plan-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin: 0.8rem 0 1.5rem;
+    line-height: 1.6;
+  }
+
+  .plan-features {
+    list-style: none;
+    margin-bottom: 2rem;
+  }
+
+  .plan-features li {
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .plan-features li::before {
+    content: '✓';
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .plan-features li.disabled {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  .plan-features li.disabled::before { content: '—'; color: var(--muted); }
+
+  .plan-btn {
+    display: block;
+    text-align: center;
+    padding: 0.85rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .plan-btn-outline {
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .plan-btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .plan-btn-solid {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 0 20px rgba(0,229,160,0.25);
+  }
+
+  .plan-btn-solid:hover {
+    box-shadow: 0 0 35px rgba(0,229,160,0.4);
+    transform: translateY(-1px);
+  }
+
+  /* ─── CTA ─── */
+  .cta-section {
+    text-align: center;
+    padding: 8rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(0,229,160,0.1) 0%, transparent 65%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .cta-section h2 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .cta-section p {
+    color: var(--muted);
+    max-width: 440px;
+    margin: 0 auto 2.5rem;
+    font-size: 1rem;
+    line-height: 1.7;
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+  }
+
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .footer-links a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--text); }
+
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  /* ─── SCROLL ANIMATIONS ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 700px) {
+    nav ul { display: none; }
+    nav { padding: 1.2rem 1.5rem; }
+    section { padding: 5rem 1.2rem; }
+    .steps { grid-template-columns: 1fr; }
+    .step-connector { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">📲</div>
+    Call<span>Relay</span>
+  </div>
+  <ul>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#cta" class="nav-cta">Start Free</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <div class="badge">⚡ Auto-reply in under 10 seconds</div>
+
+  <h1>Every Missed Call Gets<br><em>An Instant Reply</em></h1>
+
+  <p class="hero-sub">
+    CallRelay automatically sends a personalized text message the moment a customer call goes unanswered — so you never lose a lead, even when you're busy.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#cta" class="btn-primary">Get Started Free →</a>
+    <a href="#how" class="btn-secondary">See How It Works</a>
+  </div>
+
+  <div class="mockup-wrap">
+    <div class="phone">
+      <div class="phone-notch"></div>
+
+      <div class="missed-call">
+        <div class="call-icon">📞</div>
+        <div class="call-details">
+          <div class="call-name">Sarah Mitchell</div>
+          <div class="call-label">● Missed Call</div>
+        </div>
+        <div class="call-time">2s ago</div>
+      </div>
+
+      <div class="sms-bubble">
+        <div class="relay-badge-phone">CallRelay</div>
+        <div class="sms-label">AUTO-REPLY SENT</div>
+        Hi Sarah! Sorry we missed your call — we're with another customer. We'll be in touch shortly. Reply to this text anytime! 👋
+        <div class="sms-sent-time">✓✓ Delivered · just now</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGOS -->
+<div class="logos-bar">
+  <p>Trusted by growing businesses across industries</p>
+  <div class="logos-row">
+    <div class="logo-item">Greenfield Plumbing</div>
+    <div class="logo-item">Bella & Co. Salon</div>
+    <div class="logo-item">Peak Auto Repair</div>
+    <div class="logo-item">Ridgeline Realty</div>
+    <div class="logo-item">Nova Dental</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">How It Works</div>
+      <h2>From missed call to<br>connected customer</h2>
+      <p class="section-sub">Three steps, fully automated. Set it up once and let CallRelay do the work 24/7.</p>
+    </div>
+
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01 —</div>
+        <div class="step-icon">📵</div>
+        <h3>Call Goes Unanswered</h3>
+        <p>A customer calls your business number. You're unavailable — on another call, with a client, or after hours.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02 —</div>
+        <div class="step-icon">⚡</div>
+        <h3>CallRelay Detects It</h3>
+        <p>Within seconds, our system detects the missed call and triggers your personalized auto-reply workflow.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03 —</div>
+        <div class="step-icon">💬</div>
+        <h3>Customer Gets a Text</h3>
+        <p>A warm, professional SMS is sent to the caller automatically. They feel heard — and you keep the lead.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Features</div>
+      <h2>Everything you need,<br>nothing you don't</h2>
+      <p class="section-sub">Built specifically for small businesses that live and die by their phone.</p>
+    </div>
+
+    <div class="features-grid reveal">
+      <div class="feature">
+        <div class="feature-icon">🎨</div>
+        <h3>Custom Message Templates</h3>
+        <p>Write your own reply — or use ours. Personalize by business type, time of day, or caller history.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🕐</div>
+        <h3>After-Hours Mode</h3>
+        <p>Set different messages for business hours vs. evenings and weekends. Always sound professional.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <h3>Reply Analytics</h3>
+        <p>See open rates, response rates, and which messages convert missed calls into booked appointments.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔗</div>
+        <h3>Two-Way Texting</h3>
+        <p>Customers can text back and you can reply from the CallRelay dashboard — no new app needed.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📅</div>
+        <h3>Booking Link Integration</h3>
+        <p>Automatically include a scheduling link in your reply so customers can book instantly.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔌</div>
+        <h3>Works With Your Number</h3>
+        <p>No number changes needed. CallRelay works with your existing business phone line.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-section">
+  <div class="container">
+    <div class="stats-grid reveal">
+      <div>
+        <div class="stat-num">85%</div>
+        <div class="stat-label">of callers won't call back if ignored</div>
+      </div>
+      <div>
+        <div class="stat-num">&lt;10s</div>
+        <div class="stat-label">average auto-reply delivery time</div>
+      </div>
+      <div>
+        <div class="stat-num">3×</div>
+        <div class="stat-label">more responses vs. voicemail</div>
+      </div>
+      <div>
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">always-on coverage</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div class="reveal" style="text-align:center; max-width: 500px; margin: 0 auto;">
+      <div class="section-label">Pricing</div>
+      <h2>Simple, honest pricing</h2>
+      <p class="section-sub" style="margin: 0 auto;">No contracts. No setup fees. Cancel anytime.</p>
+    </div>
+
+    <div class="pricing-grid reveal">
+      <div class="plan">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price"><sup>$</sup>19<span>/mo</span></div>
+        <div class="plan-desc">Perfect for solo operators and freelancers.</div>
+        <ul class="plan-features">
+          <li>Up to 100 auto-replies/mo</li>
+          <li>1 custom message template</li>
+          <li>Basic analytics</li>
+          <li>Email support</li>
+          <li class="disabled">Two-way texting</li>
+          <li class="disabled">Booking link integration</li>
+        </ul>
+        <a href="#" class="plan-btn plan-btn-outline">Get Started</a>
+      </div>
+
+      <div class="plan featured">
+        <div class="plan-badge">Most Popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price"><sup>$</sup>49<span>/mo</span></div>
+        <div class="plan-desc">For growing businesses that can't afford to miss a call.</div>
+        <ul class="plan-features">
+          <li>Unlimited auto-replies</li>
+          <li>5 custom message templates</li>
+          <li>Full analytics dashboard</li>
+          <li>Two-way texting</li>
+          <li>Booking link integration</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#" class="plan-btn plan-btn-solid">Start Free Trial</a>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Business</div>
+        <div class="plan-price"><sup>$</sup>99<span>/mo</span></div>
+        <div class="plan-desc">For teams managing multiple lines and locations.</div>
+        <ul class="plan-features">
+          <li>Unlimited auto-replies</li>
+          <li>Unlimited templates</li>
+          <li>Multi-location support</li>
+          <li>Team inbox + assignments</li>
+          <li>CRM integrations</li>
+          <li>Dedicated account manager</li>
+        </ul>
+        <a href="#" class="plan-btn plan-btn-outline">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="reveal">
+    <h2>Stop losing customers<br>to missed calls</h2>
+    <p>Set up CallRelay in minutes. Your first 14 days are completely free — no credit card required.</p>
+    <a href="#" class="btn-primary" style="display:inline-block; font-size:1.05rem; padding: 1rem 2.5rem;">Start Your Free Trial →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="logo">
+      <div class="logo-icon" style="width:26px;height:26px;font-size:0.75rem;">📲</div>
+      Call<span>Relay</span>
+    </div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Support</a>
+      <a href="#">Blog</a>
+    </div>
+    <div class="footer-copy">© 2026 CallRelay. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
